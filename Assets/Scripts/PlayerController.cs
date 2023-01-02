@@ -10,17 +10,21 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed = 5;
     [SerializeField] private LayerMask _enemyHitMask;
-
+    [SerializeField] private int _hitpoints = 3;
+    
 
     private Rigidbody2D _rigidbody2D;
     private Animator _animator;
+    private SpriteRenderer _renderer;
     private float _lookDir = 1; //-1 left, 1 right
     private Vector3 _lastPos; //Position where the Player was last frame
-
+    private bool _isInvulnerable;
+    
     void Awake()
     {
         _animator = GetComponent<Animator>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _renderer = GetComponent<SpriteRenderer>();
         _lastPos = transform.position;
     }
 
@@ -133,5 +137,36 @@ public class PlayerController : MonoBehaviour
         transform.localScale = newScale;
 
         _lastPos = transform.position;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        Enemy collidingEnemy = collision.gameObject.GetComponent<Enemy>();
+        if (collidingEnemy != null && _isInvulnerable == false)
+        {
+            _hitpoints--;
+            if (_hitpoints <= 0)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                _isInvulnerable = true;
+                _animator.SetTrigger("Hurt");
+                Sequence seq = DOTween.Sequence();
+                seq.Append(_renderer.DOColor(Color.red, 0.2f));
+                seq.AppendInterval(0.1f);
+                seq.Append(_renderer.DOColor(Color.white, 0.2f));
+                seq.AppendInterval(0.1f);
+                seq.Append(_renderer.DOColor(Color.red, 0.2f));
+                seq.AppendInterval(0.1f);
+                seq.Append(_renderer.DOColor(Color.white, 0.2f));
+                seq.OnComplete(() =>
+                {
+                    _isInvulnerable = false;
+                    _animator.SetTrigger("Recover");
+                });
+            }
+        }
     }
 }

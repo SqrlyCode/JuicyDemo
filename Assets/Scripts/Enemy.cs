@@ -22,11 +22,14 @@ public class Enemy : MonoBehaviour
 
     void FixedUpdate()
     {
-        float xDirToPlayer = Mathf.Sign(_player.transform.position.x - transform.position.x);
-        float moveSpeed = xDirToPlayer * Time.deltaTime * _moveSpeed;
-        _rigidbody2D.MovePosition(transform.position + Vector3.right * moveSpeed);
+        if (_player != null)
+        {
+            float xDirToPlayer = Mathf.Sign(_player.transform.position.x - transform.position.x);
+            float moveSpeed = xDirToPlayer * Time.deltaTime * _moveSpeed;
+            _rigidbody2D.MovePosition(transform.position + Vector3.right * moveSpeed);
 
-        UpdateLookDir();
+            UpdateLookDir();
+        }
     }
 
     private Sequence seq;
