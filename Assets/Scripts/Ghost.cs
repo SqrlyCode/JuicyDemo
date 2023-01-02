@@ -14,10 +14,11 @@ public class Ghost : MonoBehaviour
     void MoveToRandomDir()
     {
         Vector2 newPos = new Vector2(Random.Range(_minPos.x, _maxPos.x), Random.Range(_minPos.y, _maxPos.y));
-        transform.DOMove(newPos, 1)
+        
+        //TODO: The ghost should continually move towards a random Direction
+        transform.DOMove(newPos, 2)
             .SetEase(Ease.InOutSine)
-            // .SetEase(Ease.Linear)
-            .SetSpeedBased(true)
+            .SetDelay(2)
             .OnComplete(MoveToRandomDir);
     }
 }
