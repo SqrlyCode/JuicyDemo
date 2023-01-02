@@ -32,7 +32,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private Sequence seq;
     
     public void ReceiveDamage()
     {
@@ -41,14 +40,10 @@ public class Enemy : MonoBehaviour
         {
             Destroy(gameObject);
             Instantiate(_deathEffectPrefab, transform.position, Quaternion.identity);
-            seq.Kill();
         }
         else
         {
-            seq = DOTween.Sequence();
-            seq.Append(_renderer.DOColor(Color.red, 0.1f));
-            seq.AppendInterval(0.1f);
-            seq.Append(_renderer.DOColor(Color.white, 0.1f));
+            //TODO: Tween color
         }
     }
 

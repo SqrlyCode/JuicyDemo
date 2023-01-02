@@ -157,6 +157,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27107608c5f9bc245b7b5aca99e8ddba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hp: 2
+  _hp: 1
   _deathEffectPrefab: {fileID: 3617462277057748189, guid: 821452db87142ca4390f89c5a12658b7, type: 3}
   _moveSpeed: 0.3
