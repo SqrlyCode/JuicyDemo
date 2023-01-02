@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -8,14 +9,13 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject _deathEffectPrefab;
     [SerializeField] private float _moveSpeed = 1;
 
-
-    private Animator _animator;
+    private SpriteRenderer _renderer;
     private Rigidbody2D _rigidbody2D;
     private PlayerController _player;
 
     void Awake()
     {
-        _animator = GetComponent<Animator>();
+        _renderer = GetComponent<SpriteRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _player = FindObjectOfType<PlayerController>();
     }
@@ -29,6 +29,8 @@ public class Enemy : MonoBehaviour
         UpdateLookDir();
     }
 
+    private Sequence seq;
+    
     public void ReceiveDamage()
     {
         _hp--;
@@ -36,6 +38,14 @@ public class Enemy : MonoBehaviour
         {
             Destroy(gameObject);
             Instantiate(_deathEffectPrefab, transform.position, Quaternion.identity);
+            seq.Kill();
+        }
+        else
+        {
+            seq = DOTween.Sequence();
+            seq.Append(_renderer.DOColor(Color.red, 0.1f));
+            seq.AppendInterval(0.1f);
+            seq.Append(_renderer.DOColor(Color.white, 0.1f));
         }
     }
 

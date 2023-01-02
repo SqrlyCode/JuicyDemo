@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             Enemy closestEnemy = GetClosestEnemy();
-            if(closestEnemy != null)
+            if (closestEnemy != null)
                 StartCoroutine(Attack(closestEnemy));
         }
     }
@@ -39,7 +39,8 @@ public class PlayerController : MonoBehaviour
         //Move Player
         float horInput = Input.GetAxis("Horizontal");
         Vector2 moveSpeed = new Vector2(horInput, 0) * (Time.deltaTime * _moveSpeed);
-        _rigidbody2D.MovePosition(_rigidbody2D.position + Vector3.down * (-Physics2D.gravity*Time.deltaTime) + moveSpeed);
+        _rigidbody2D.MovePosition(_rigidbody2D.position + Vector3.down * (-Physics2D.gravity * Time.deltaTime) +
+                                  moveSpeed);
         _animator.SetFloat("MoveSpeed", Mathf.Abs(horInput));
 
         UpdateLookDir();
@@ -48,32 +49,40 @@ public class PlayerController : MonoBehaviour
     private IEnumerator Attack(Enemy enemy)
     {
         //TODO: Dash to Enemy
-        Vector3 dashTarget = GetPosInFrontOfEnemy(enemy, 1f);
-
-        Tween dashTween = transform.DOMove(dashTarget, 0.5f)
-            .SetEase(Ease.InOutCubic);
-
+        Vector3 dashTarget = GetPosInFrontOfEnemy(enemy, 1.7f);
+        UpdateLookDir(enemy.transform);
+        // if (Mathf.Abs(enemy.transform.position.x - transform.position.x) > 1.7f)
+        if(Vector3.Distance(enemy.transform.position, transform.position) > 1.7f)
+        {
+            Tween dashTween = transform.DOMove(dashTarget, 0.5f)
+                .SetEase(Ease.InOutCubic);
+        }
 
         _animator.SetTrigger("Attack");
         yield return new WaitForEndOfFrame();
 
-        //Wait until player stands in front of enemy for damagecheck
-        while (dashTween.active)
+        //As long as Attack-Animation is playing dead damage in front of player
+        AnimatorStateInfo animatorStateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+        while (animatorStateInfo.IsName("HeroAttack") && animatorStateInfo.normalizedTime < 1)
         {
             float attackDistance = 1.7f;
             float attackRadius = 0.3f;
-            RaycastHit2D rayHit = Physics2D.CircleCast(transform.position, attackDistance, Vector2.right * _lookDir,
+            RaycastHit2D[] rayHits = Physics2D.CircleCastAll(transform.position, attackDistance, Vector2.right * _lookDir,
                 attackRadius, _enemyHitMask);
 
             //Deal damage to enemy
-            Collider2D hitEnemyCollider = rayHit.collider;
-            if (hitEnemyCollider != null)
+            foreach (RaycastHit2D rayHit in rayHits)
             {
-                Enemy hitEnemy = hitEnemyCollider.GetComponent<Enemy>();
-                hitEnemy.ReceiveDamage();
-                break;
+                Collider2D hitEnemyCollider = rayHit.collider;
+                if (hitEnemyCollider != null)
+                {
+                    Enemy hitEnemy = hitEnemyCollider.GetComponent<Enemy>();
+                    hitEnemy.ReceiveDamage();
+                }
             }
 
+            if (rayHits.Length > 0)
+                break;
             yield return new WaitForEndOfFrame();
         }
     }
@@ -102,17 +111,27 @@ public class PlayerController : MonoBehaviour
         return transform.position + dirToEnemy - dirToEnemy.normalized * distanceToObject;
     }
 
-    private void UpdateLookDir()
+    private void UpdateLookDir(Transform target = null)
     {
-        float deltaX = transform.position.x - _lastPos.x;
-        if (Mathf.Abs(deltaX) > 0.01f)
+        if (target == null)
         {
-            _lookDir = Mathf.Sign(deltaX);
-            //Flip Player left and right based on movement
-            Vector3 newScale = transform.localScale;
-            newScale.x = _lookDir * Mathf.Abs(newScale.x);
-            transform.localScale = newScale;
+            float deltaX = transform.position.x - _lastPos.x;
+            if (Mathf.Abs(deltaX) > 0.1f * Time.deltaTime)
+            {
+                _lookDir = Mathf.Sign(deltaX);
+            }
         }
+        else
+        {
+            float deltaX = target.position.x - transform.position.x;
+            _lookDir = Mathf.Sign(deltaX);
+        }
+
+        //Flip Player left and right based on movement
+        Vector3 newScale = transform.localScale;
+        newScale.x = _lookDir * Mathf.Abs(newScale.x);
+        transform.localScale = newScale;
+
         _lastPos = transform.position;
     }
 }
