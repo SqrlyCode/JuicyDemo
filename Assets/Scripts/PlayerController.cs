@@ -41,13 +41,16 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Attack(Enemy enemy)
     {
-        //TODO: Set to position in front of enemy
+        //TODO: Set to position in front of enemy with a Distance of 1.7f
         Vector3 dashDestination = Vector3.zero;
         if (enemy != null)
             UpdateLookDir(enemy.transform);
 
-        //TODO: Replace with DoTween
-        transform.position = dashDestination;
+        if (Vector3.Distance(enemy.transform.position, transform.position) > 1.7f)
+        {
+            //TODO: Replace with DoTween
+            transform.position = dashDestination;
+        }
 
         _animator.SetTrigger("Attack");
         yield return new WaitForEndOfFrame();
